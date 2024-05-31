@@ -8,6 +8,7 @@ context_yaml
 log/
 log_tensorboard/
 saved/
+Frontend/
 
 # 모든 확장자 파일을 무시
 *.csv
@@ -15,3 +16,4 @@ saved/
 *.env
 Dockerfile
 *.json
+*.zip

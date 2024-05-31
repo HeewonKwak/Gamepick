@@ -1,5 +1,6 @@
 # model
-import openai
+# import openai
+import google.generativeai as genai
 from core.config import API_KEY
 # data
 import numpy as np
@@ -21,7 +22,7 @@ class HybridModel():
     
     def initialize_data(self):
         self.game_table = load_data_from_redis('game')
-        self.model_table = load_data_from_redis('Ease')
+        self.model_table = load_data_from_redis('ease')
         self.user_table = load_data_from_redis('cf_model')
     
     def preprocess(self):
@@ -54,7 +55,7 @@ class HybridModel_Modify():
     
     def initialize_data(self):
         self.game_table = load_data_from_redis('game')
-        self.model_table = load_data_from_redis('Ease')
+        self.model_table = load_data_from_redis('ease')
         self.user_table = load_data_from_redis('cf_model')
     
     def preprocess(self):
@@ -110,29 +111,55 @@ class Most_popular_filter():
         self.details_table = self.details_table.sort_values(by="critic_score", ascending=False)
         return list(self.details_table.head(10)['id'])
 
-def chatGPT(user_data):
+# def chatGPT(user_data):
+#     # set api key
+#     openai.api_key = API_KEY 
+
+#     if user_data.players == "0" and len(user_data.tag) == 0:
+#         message = "{}살이상이고 {}를 가지고 있고 {} 장르를 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.games)
+#     elif user_data.players == "0":
+#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 게임을 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.games)
+#     elif len(user_data.tag) == 0:
+#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.players, user_data.games)
+#     else:
+#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.players, user_data.games)
+
+#     # Call the chat GPT API
+#     completion = openai.ChatCompletion.create(
+#         model="gpt-3.5-turbo",
+#         messages=[
+#             {"role": "system", "content": f"게임을 플레이한 유저의 정보를 보여줄테니까 이 정보를 바탕으로 게임 10개를 이름만 추천해줘"},
+#             {"role": "system", "content": f"게임의 영어 정식 명칭으로 추천 해주고 유저가 이미 플레이 한 게임은 추천하지 말아줘."},
+#             {"role": "assistant", "content": f"다음 예시와 같이 대답해줘. 1. 게임1 2. 게임2 3. 게임3 4. 게임4 5. 게임5 6. 게임6 7. 게임7 8. 게임8 9. 게임9 10. 게임10"},
+#             {"role": "user", "content": message}
+#         ],
+#         temperature=0,
+#         max_tokens=100
+#     )
+#     return completion['choices'][0]['message']['content']
+
+def gemini_ai(user_data):
     # set api key
-    openai.api_key = API_KEY 
-
+    genai.configure(api_key=API_KEY)
+    
+    message = "게임을 플레이한 유저의 정보를 보여줄테니까 이 정보를 바탕으로 게임 10개를 이름만 추천해줘. \
+            게임의 영어 정식 명칭으로 추천 해주고 유저가 이미 플레이 한 게임은 추천하지 말아줘. \
+            다음 예시와 같이 대답해줘. 1. 게임1 2. 게임2 3. 게임3 4. 게임4 5. 게임5 6. 게임6 7. 게임7 8. 게임8 9. 게임9 10. 게임10 \
+            유저 정보: "
+            
     if user_data.players == "0" and len(user_data.tag) == 0:
-        message = "{}살이상이고 {}를 가지고 있고 {} 장르를 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.games)
+        message += "{}살이상이고 {}를 가지고 있고 {} 장르를 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.games)
     elif user_data.players == "0":
-        message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 게임을 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.games)
+        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 게임을 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.games)
     elif len(user_data.tag) == 0:
-        message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.players, user_data.games)
+        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.players, user_data.games)
     else:
-        message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.players, user_data.games)
+        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.players, user_data.games)
 
-    # Call the chat GPT API
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": f"게임을 플레이한 유저의 정보를 보여줄테니까 이 정보를 바탕으로 게임 10개를 이름만 추천해줘"},
-            {"role": "system", "content": f"게임의 영어 정식 명칭으로 추천 해주고 유저가 이미 플레이 한 게임은 추천하지 말아줘."},
-            {"role": "assistant", "content": f"다음 예시와 같이 대답해줘. 1. 게임1 2. 게임2 3. 게임3 4. 게임4 5. 게임5 6. 게임6 7. 게임7 8. 게임8 9. 게임9 10. 게임10"},
-            {"role": "user", "content": message}
-        ],
-        temperature=0,
-        max_tokens=100
-    )
-    return completion['choices'][0]['message']['content']
+    generation_config = genai.GenerationConfig(temperature=0, max_output_tokens=100)
+
+    model = genai.GenerativeModel('gemini-pro', generation_config=generation_config)
+
+    response = model.generate_content(message)
+
+    return response.text

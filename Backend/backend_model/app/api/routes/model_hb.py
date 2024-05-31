@@ -19,8 +19,8 @@ def get_recommendations(data_point):
     return hb_model.predict()
 
 def get_recommendations2(data_point):
-    hb_model = joblib.load('tests/model.pkl')
-    # hb_model = HybridModel_Modify()
+    # hb_model = joblib.load('tests/model.pkl')
+    hb_model = HybridModel_Modify()
     # joblib.dump(hb_model, 'tests/model.pkl')
     return hb_model.predict(data_point)
 

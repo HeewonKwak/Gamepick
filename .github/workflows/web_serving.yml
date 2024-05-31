@@ -56,4 +56,4 @@ jobs:
               sudo docker stop $CONTAINER_NAME
               sudo docker rm $CONTAINER_NAME
               sudo docker rmi $(docker images -f "dangling=true" -q)
-              sudo docker run --env-file web/.env -d --name $CONTAINER_NAME -p 80:8000 $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+              sudo docker run --env-file ~/web/.env -d --name $CONTAINER_NAME -p 8000:8000 $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_TAG

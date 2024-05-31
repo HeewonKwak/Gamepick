@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - REFACTOR-#2
     paths:
       - '.github/workflows/web_serving.yml'
       - 'Backend/web/**'

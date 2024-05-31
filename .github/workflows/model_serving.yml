@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main # 또는 배포하려는 브랜치
+      - REFACTOR-#2
     paths:
       - 'Backend/backend_model/**'
       - '.github/workflows/model_serving.yml'

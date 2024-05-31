@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from services.predict import chatGPT
+from services.predict import gemini_ai
 from models.prediction import (
     RecommendedGame,
     ModelInput
@@ -14,7 +14,7 @@ router = APIRouter()
 ## Change this portion for other types of models
 ## Add the correct type hinting when completed
 def get_recommendations(data_point):
-    return chatGPT(data_point)
+    return gemini_ai(data_point)
 
 
 def make_list(gpt_answer):

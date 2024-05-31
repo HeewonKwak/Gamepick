@@ -46,9 +46,9 @@ jobs:
         name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.WEB_HOST }} 
-          username: ${{ secrets.WEB_USERNAME }}
-          key: ${{ secrets.WEB_SSH_KEY }}
+          host: ${{ secrets.HOST }} 
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           port: 22
           envs: DOCKER_REGISTRY,IMAGE_NAME,IMAGE_TAG,CONTAINER_NAME
           script: |

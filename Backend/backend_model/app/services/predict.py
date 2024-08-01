@@ -111,55 +111,55 @@ class Most_popular_filter():
         self.details_table = self.details_table.sort_values(by="critic_score", ascending=False)
         return list(self.details_table.head(10)['id'])
 
-# def chatGPT(user_data):
-#     # set api key
-#     openai.api_key = API_KEY 
+import random
 
-#     if user_data.players == "0" and len(user_data.tag) == 0:
-#         message = "{}살이상이고 {}를 가지고 있고 {} 장르를 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.games)
-#     elif user_data.players == "0":
-#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 게임을 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.games)
-#     elif len(user_data.tag) == 0:
-#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.players, user_data.games)
-#     else:
-#         message = "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.players, user_data.games)
-
-#     # Call the chat GPT API
-#     completion = openai.ChatCompletion.create(
-#         model="gpt-3.5-turbo",
-#         messages=[
-#             {"role": "system", "content": f"게임을 플레이한 유저의 정보를 보여줄테니까 이 정보를 바탕으로 게임 10개를 이름만 추천해줘"},
-#             {"role": "system", "content": f"게임의 영어 정식 명칭으로 추천 해주고 유저가 이미 플레이 한 게임은 추천하지 말아줘."},
-#             {"role": "assistant", "content": f"다음 예시와 같이 대답해줘. 1. 게임1 2. 게임2 3. 게임3 4. 게임4 5. 게임5 6. 게임6 7. 게임7 8. 게임8 9. 게임9 10. 게임10"},
-#             {"role": "user", "content": message}
-#         ],
-#         temperature=0,
-#         max_tokens=100
-#     )
-#     return completion['choices'][0]['message']['content']
+def get_random_adjective():
+    """
+    추천 게임에 대한 다양한 형용사를 무작위로 반환하는 함수
+    """
+    adjectives = ["exciting", "challenging", "fun", "unique", "immersive", "new"]
+    return random.choice(adjectives)
 
 def gemini_ai(user_data):
+    """
+    Gemini API를 이용하여 사용자에게 맞춤형 게임을 추천하는 함수
+
+    Args:
+        user_data: 사용자 정보를 담은 객체
+
+    Returns:
+        추천된 게임 목록 (문자열)
+    """
     # set api key
     genai.configure(api_key=API_KEY)
     
-    message = "게임을 플레이한 유저의 정보를 보여줄테니까 이 정보를 바탕으로 게임 10개를 이름만 추천해줘. \
-            게임의 영어 정식 명칭으로 추천 해주고 유저가 이미 플레이 한 게임은 추천하지 말아줘. \
-            다음 예시와 같이 대답해줘. 1. 게임1 2. 게임2 3. 게임3 4. 게임4 5. 게임5 6. 게임6 7. 게임7 8. 게임8 9. 게임9 10. 게임10 \
-            유저 정보: "
-            
-    if user_data.players == "0" and len(user_data.tag) == 0:
-        message += "{}살이상이고 {}를 가지고 있고 {} 장르를 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.games)
-    elif user_data.players == "0":
-        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 게임을 선호해 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.games)
-    elif len(user_data.tag) == 0:
-        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.players, user_data.games)
-    else:
-        message += "{}살이상이고 {}를 가지고 있고 {} 장르와 {} 부분을 고려한 {}인용 게임를 선호해. 해본 게임은 {}야".format(user_data.age, user_data.platform, user_data.major_genre, user_data.tag, user_data.players, user_data.games)
+    # 프롬프트 생성 (다양한 경우의 수 고려)
+    prompt = f"I'm looking for {get_random_adjective()} games that is similar to the ones I've played. Considering my age ({user_data.age}), platform ({user_data.platform}), and preferred genre ({user_data.major_genre}), please suggest 10 games that I might enjoy."
 
-    generation_config = genai.GenerationConfig(temperature=0, max_output_tokens=100)
+    if user_data.tag:
+        prompt += f" Additionally, I'm interested in games with {user_data.tag} elements."
+
+    if user_data.players:
+        prompt += f" I prefer games that can be played with {user_data.players} players."
+
+    # 플레이한 게임 목록 추가
+    prompt += f" I have already played: {user_data.games}. Please suggest new games that I haven't played yet."
+    
+    # 출력 예시
+    prompt += f" Output format: 1. game1 2. game2 3. game3 4. game4 5. game5 6. game6 7. game7 8. game8 9. game9 10. game10"
+
+    # Gemini 모델 설정
+    generation_config = genai.GenerationConfig(
+        temperature=0.7,  # 창의성 조절
+        max_output_tokens=200,  # 출력 길이 조절
+    )
 
     model = genai.GenerativeModel('gemini-pro', generation_config=generation_config)
 
-    response = model.generate_content(message)
-
-    return response.text
+    # API 호출 및 오류 처리
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return "An error occurred while generating recommendations. Please try again later."
